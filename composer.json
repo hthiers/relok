@@ -1,0 +1,19 @@
+{
+    "require": {
+      "ext-gd": "*",
+      "phpoffice/phpexcel": "1.8.0",
+      "phpoffice/phpspreadsheet": "^1.0",
+      "mpdf/mpdf": "^8.0",
+      "dompdf/dompdf": "0.8.2",
+      "tecnickcom/tcpdf": "6.2.13",
+      "jpgraph/jpgraph": "4.0.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\Controllers\\": "controllers/",
+            "App\\Models\\": "models/",
+            "App\\Libs\\": "libs/",
+            "App\\VO\\": "vo/"
+        }
+    }
+}
