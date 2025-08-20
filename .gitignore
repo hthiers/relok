@@ -1,0 +1,39 @@
+# macOS
+.DS_Store
+
+# Environment files
+.env
+.env.local
+.env.*.local
+config.php
+
+# PHP / Composer
+/vendor/
+composer.lock
+/.phpunit.result.cache
+
+# Node / front-end
+/node_modules/
+dist/
+build/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Logs, cache, temp
+*.log
+cache/
+tmp/
+storage/logs/
+phpunit.xml
+
+# Docker / local data
+docker-compose.override.yml
+db_data/
+
+# Misc
+*.swp
+*~
