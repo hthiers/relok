@@ -37,3 +37,6 @@ db_data/
 # Misc
 *.swp
 *~
+.DS_Store
+vendor/
+vendor
