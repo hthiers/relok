@@ -1,26 +1,25 @@
 <?php
-require_once __DIR__ . '/../models/TaskRepository.php';
-require_once __DIR__ . '/../models/UnitRepository.php';
+namespace App\Controllers;
 
-/**
- * Controlador para el listado de tareas.
- * Orquesta la carga de la vista y sirve los datos en formato JSON
- * consumidos por el datagrid.
- */
-class TasksNewController
+use App\Libs\ControllerBase;
+use App\Libs\SPDO;
+use App\Models\TaskRepository;
+use App\Models\UnitRepository;
+
+class TasksNewController extends ControllerBase
 {
-    /** @var \PDO */
-    private \PDO $pdo;
-
-    /** @var TaskRepository */
     private TaskRepository $taskRepo;
-
-    /** @var UnitRepository */
     private UnitRepository $unitRepo;
 
-    public function __construct(\PDO $pdo)
+    public function __construct()
     {
-        $this->pdo     = $pdo;
+        // inicializa las propiedades heredadas (view, utils, etc.)
+        parent::__construct();
+
+        // Obtén la conexión usando el singleton de SPDO
+        $pdo = SPDO::singleton();
+
+        // Instancia los repositorios con esa conexión
         $this->taskRepo = new TaskRepository($pdo);
         $this->unitRepo = new UnitRepository($pdo);
     }
@@ -36,8 +35,16 @@ class TasksNewController
         $units = $unitsResult['items'] ?? [];
 
         // Aquí puedes añadir más listados (clientes, proyectos, tipos, usuarios).
-        // Incluye la plantilla de la vista correspondiente
-        include __DIR__ . '/../views/tasks/index.php';
+        $data = [
+            'units' => $units,
+            // 'customers' => $customers,
+            // 'projects' => $projects,
+            // 'types' => $types,
+            // 'users' => $users,
+        ];
+
+        // Renderizar la vista. Usa la ruta relativa al directorio de vistas.
+        $this->view->show('tasksnew/index.php', $data);
     }
 
     /**

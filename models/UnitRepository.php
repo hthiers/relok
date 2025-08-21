@@ -1,5 +1,5 @@
 <?php
-// models/UnitRepository.php
+namespace App\Models;
 
 class UnitRepository
 {

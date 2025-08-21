@@ -33,7 +33,7 @@ class View
         // Check if the template file exists
         if (!file_exists($path)) 
         {
-            throw new Exception('Template `' . $path . '` does not exist.');
+            throw new \Exception('Template `' . $path . '` does not exist.');
         }
 
         // Extract variables to be available in the template
