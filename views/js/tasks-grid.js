@@ -33,7 +33,7 @@
   };
 
   async function load() {
-    const url = `/tasksnew/datagrid?${qs(state)}`;
+    const url = `/index.php?controller=tasksnew&action=datagrid&${qs(state)}`;
     const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
     const data = await res.json();
     renderRows(data.items || []);

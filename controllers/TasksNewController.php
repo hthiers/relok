@@ -30,21 +30,23 @@ class TasksNewController extends ControllerBase
      */
     public function index(): void
     {
-        // Traer unidades activas para el selector; paginamos lo suficiente
-        $unitsResult = $this->unitRepo->findAll(1, 1000);
-        $units = $unitsResult['items'] ?? [];
+      $unitsResult = $this->unitRepo->findAll(1, 1000);
+      $units = $unitsResult['items'] ?? [];
 
-        // Aquí puedes añadir más listados (clientes, proyectos, tipos, usuarios).
-        $data = [
-            'units' => $units,
-            // 'customers' => $customers,
-            // 'projects' => $projects,
-            // 'types' => $types,
-            // 'users' => $users,
-        ];
+      $data = [
+          'page_title'   => 'Tareas',
+          'content_view' => 'tasksnew/table.php', // <-- partial que creaste
+          'units'        => $units,
+          // Si quieres cards de resumen en el layout:
+          // 'summary_cards' => [
+          //   ['label' => 'Abiertas',     'value' => 24],
+          //   ['label' => 'En progreso',  'value' => 13],
+          //   ['label' => 'Cerradas',     'value' => 8],
+          //   ['label' => 'Tiempo (h)',   'value' => 120],
+          // ],
+      ];
 
-        // Renderizar la vista. Usa la ruta relativa al directorio de vistas.
-        $this->view->show('tasksnew/index.php', $data);
+      $this->view->show('layouts/cms.php', $data);
     }
 
     /**
