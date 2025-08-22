@@ -91,8 +91,7 @@ $contentPath = $contentPath ?? null;
       </div>
       </div>
     </main>
-  <script src="/public/vendor/preline/index.js"
-          onload="window.HSStaticMethods?.autoInit()"
-          onerror="(function(){var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/preline@2.5.0/dist/preline.min.js';s.onload=function(){window.HSStaticMethods?.autoInit()};document.head.appendChild(s)})()"></script>
+    
+    <script src="/public/vendor/preline/index.js"></script>
 </body>
 </html>
