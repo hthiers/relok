@@ -49,9 +49,8 @@
       tr.innerHTML = `
         <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${it.id ?? ''}</td>
         <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${escapeHtml(it.label ?? '')}</td>
-        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${escapeHtml(it.status ?? '')}</td>
+        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${escapeHtml(it.name_status ?? '')}</td>
         <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${escapeHtml(it.unit_name ?? '')}</td>
-        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${escapeHtml(it.project_name ?? '')}</td>
         <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${escapeHtml(it.customer_name ?? '')}</td>
         <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${escapeHtml(it.type_name ?? '')}</td>
         <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${escapeHtml(it.start_date ?? '')}</td>

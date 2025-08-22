@@ -9,9 +9,9 @@
                 <label for="status" class="block text-sm font-medium mb-2 dark:text-white">Estado</label>
                 <select name="status" id="status" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400">
                     <option value="">Todos</option>
-                    <option value="1">Pendiente</option>
-                    <option value="2">En Proceso</option>
-                    <option value="3">Completada</option>
+                    <option value="1">En Curso</option>
+                    <option value="2">Finalizada</option>
+                    <option value="3">En Pausa</option>
                 </select>
             </div>
             <div>
@@ -38,11 +38,10 @@
                             <th scope="col" class="px-3 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-400" data-sort="label">Título</th>
                             <th scope="col" class="px-3 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-400" data-sort="status">Estado</th>
                             <th scope="col" class="px-3 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-400" data-sort="unit_name">Unidad</th>
-                            <th scope="col" class="px-3 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-400" data-sort="project_name">Proyecto</th>
                             <th scope="col" class="px-3 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-400" data-sort="customer_name">Cliente</th>
                             <th scope="col" class="px-3 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-400" data-sort="type_name">Tipo</th>
-                            <th scope="col" class="px-3 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-400" data-sort="start_date">F. Inicio</th>
-                            <th scope="col" class="px-3 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-400" data-sort="end_date">F. Fin</th>
+                            <th scope="col" class="px-3 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-400" data-sort="start_date">Inicio</th>
+                            <th scope="col" class="px-3 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-400" data-sort="end_date">Fin</th>
                             <th scope="col" class="px-3 py-3 text-end text-xs font-medium text-gray-500 uppercase dark:text-neutral-400">Acciones</th>
                         </tr>
                     </thead>

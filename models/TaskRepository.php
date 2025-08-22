@@ -125,6 +125,9 @@ class TaskRepository
             $params[':day'] = (int)$criteria['day'];
         }
 
+        // Ignorar las eliminadas
+        $where[] = 't.status_task <> 9';
+
         $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
         // Consulta principal con joins a project, customer, type, user y unit
@@ -137,6 +140,7 @@ class TaskRepository
                    t.date_end    AS end_date,
                    t.time_total  AS time_total,
                    t.status_task AS status,
+                   ts.name_status AS name_status,
                    p.label_project  AS project_name,
                    c.label_customer AS customer_name,
                    ty.label_type    AS type_name,
@@ -148,6 +152,7 @@ class TaskRepository
             LEFT JOIN cas_type ty ON t.id_type = ty.id_type
             LEFT JOIN cas_user u ON t.id_user = u.id_user
             LEFT JOIN cas_unit un ON t.cas_unit_id = un.id
+            LEFT JOIN cas_task_statuses ts ON t.status_task = ts.id_status
             {$whereSql}
             ORDER BY {$sortCol} {$dir}
             LIMIT :limit OFFSET :offset
