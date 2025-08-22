@@ -1,88 +1,65 @@
-<?php
-$units = $units ?? [];
-?>
-<div class="space-y-4">
-  <!-- Filtros -->
-  <div class="p-4 bg-white border border-gray-200 rounded-lg">
-    <form id="filters" class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
-      <div>
-        <label class="block text-xs font-medium text-gray-600 mb-1">Estado</label>
-        <select name="status" class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-gray-300">
-          <option value="">Todos</option>
-          <option value="1">En progreso</option>
-          <option value="2">Terminada</option>
-        </select>
-      </div>
-      <div>
-        <label class="block text-xs font-medium text-gray-600 mb-1">Unidad</label>
-        <select name="unit_id" class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-gray-300">
-          <option value="">Todas</option>
-          <?php foreach ($units as $u): ?>
-            <option value="<?= (int)($u['id'] ?? 0) ?>"><?= htmlspecialchars($u['name'] ?? '') ?></option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-      <div>
-        <label class="block text-xs font-medium text-gray-600 mb-1">Buscar</label>
-        <input type="text" name="search" class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-gray-300" placeholder="Título o descripción">
-      </div>
-      <div>
-        <button type="submit" class="w-full inline-flex justify-center items-center gap-2 py-2.5 px-3 rounded-lg text-sm bg-indigo-600 text-white hover:bg-indigo-700">Aplicar</button>
-      </div>
+<div class="flex flex-col">
+    <form id="filters" class="mb-4 p-4 bg-gray-50 rounded-lg dark:bg-neutral-800">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label for="search" class="block text-sm font-medium mb-2 dark:text-white">Buscar</label>
+                <input type="text" name="search" id="search" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400">
+            </div>
+            <div>
+                <label for="status" class="block text-sm font-medium mb-2 dark:text-white">Estado</label>
+                <select name="status" id="status" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400">
+                    <option value="">Todos</option>
+                    <option value="1">Pendiente</option>
+                    <option value="2">En Proceso</option>
+                    <option value="3">Completada</option>
+                </select>
+            </div>
+            <div>
+                <label for="unit_id" class="block text-sm font-medium mb-2 dark:text-white">Unidad</label>
+                <select name="unit_id" id="unit_id" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400">
+                    <option value="">Todas</option>
+                    </select>
+            </div>
+        </div>
+        <div class="mt-4">
+            <button type="submit" class="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
+                Filtrar
+            </button>
+        </div>
     </form>
-  </div>
 
-  <!-- Tabla -->
-  <div class="bg-white border border-gray-200 rounded-lg shadow-xs overflow-hidden">
-    <div class="overflow-x-auto">
-      <table id="grid" class="min-w-full text-sm">
-        <thead class="bg-gray-50">
-          <tr class="text-gray-600">
-            <th data-sort="id"         class="px-4 py-3 text-left font-medium border-b border-gray-200 cursor-pointer">ID</th>
-            <th data-sort="label"      class="px-4 py-3 text-left font-medium border-b border-gray-200 cursor-pointer">Título</th>
-            <th data-sort="status"     class="px-4 py-3 text-left font-medium border-b border-gray-200 cursor-pointer">Estado</th>
-            <th data-sort="unit"       class="px-4 py-3 text-left font-medium border-b border-gray-200 cursor-pointer">Unidad</th>
-            <th data-sort="project"    class="px-4 py-3 text-left font-medium border-b border-gray-200 cursor-pointer">Proyecto</th>
-            <th data-sort="customer"   class="px-4 py-3 text-left font-medium border-b border-gray-200 cursor-pointer">Cliente</th>
-            <th data-sort="type"       class="px-4 py-3 text-left font-medium border-b border-gray-200 cursor-pointer">Materia</th>
-            <th data-sort="start_date" class="px-4 py-3 text-left font-medium border-b border-gray-200 cursor-pointer">Inicio</th>
-            <th data-sort="end_date"   class="px-4 py-3 text-left font-medium border-b border-gray-200 cursor-pointer">Término</th>
-            <th class="px-4 py-3 text-right font-medium border-b border-gray-200">Acciones</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200"></tbody>
-      </table>
+    <div class="-m-1.5 overflow-x-auto">
+        <div class="p-1.5 min-w-full inline-block align-middle">
+            <div class="border rounded-lg overflow-hidden dark:border-neutral-700">
+                <table id="grid" class="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
+                    <thead class="bg-gray-50 dark:bg-neutral-800">
+                        <tr>
+                            <th scope="col" class="px-3 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-400" data-sort="id">ID</th>
+                            <th scope="col" class="px-3 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-400" data-sort="label">Título</th>
+                            <th scope="col" class="px-3 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-400" data-sort="status">Estado</th>
+                            <th scope="col" class="px-3 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-400" data-sort="unit_name">Unidad</th>
+                            <th scope="col" class="px-3 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-400" data-sort="project_name">Proyecto</th>
+                            <th scope="col" class="px-3 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-400" data-sort="customer_name">Cliente</th>
+                            <th scope="col" class="px-3 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-400" data-sort="type_name">Tipo</th>
+                            <th scope="col" class="px-3 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-400" data-sort="start_date">F. Inicio</th>
+                            <th scope="col" class="px-3 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-400" data-sort="end_date">F. Fin</th>
+                            <th scope="col" class="px-3 py-3 text-end text-xs font-medium text-gray-500 uppercase dark:text-neutral-400">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-neutral-700">
+                        </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-  </div>
-
-  <!-- Paginación -->
-  <div id="pager" class="flex items-center gap-3">
-    <button id="prev" class="px-2 py-1 border border-gray-200 rounded-lg hover:bg-gray-50">Anterior</button>
-    <span id="pageinfo" class="text-sm text-gray-600"></span>
-    <button id="next" class="px-2 py-1 border border-gray-200 rounded-lg hover:bg-gray-50">Siguiente</button>
-  </div>
-
-  <!-- Modal edición -->
-  <dialog id="taskModal" class="rounded-lg p-0 border border-gray-200 backdrop:bg-black/20">
-    <form method="dialog">
-      <div class="p-4 space-y-3 bg-white rounded-lg">
-        <h2 class="text-lg font-semibold" id="modalTitle">Editar Tarea</h2>
-        <div>
-          <label class="block text-sm mb-1 text-gray-700">Título</label>
-          <input id="m_title" class="block w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-gray-300">
+    
+    <div class="py-4 flex justify-between items-center">
+        <span id="pageinfo" class="text-sm text-gray-700 dark:text-neutral-400"></span>
+        <div class="flex gap-2">
+            <button id="prev" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800">Anterior</button>
+            <button id="next" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800">Siguiente</button>
         </div>
-        <div>
-          <label class="block text-sm mb-1 text-gray-700">Estado</label>
-          <select id="m_status" class="block w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-gray-300">
-            <option value="1">En progreso</option>
-            <option value="2">Terminada</option>
-          </select>
-        </div>
-        <div class="flex justify-end gap-2 pt-1">
-          <button value="cancel" class="px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50">Cancelar</button>
-          <button id="saveBtn" value="default" class="px-3 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700">Guardar</button>
-        </div>
-      </div>
-    </form>
-  </dialog>
+    </div>
 </div>
+
+<script src="/views/js/tasks-grid.js"></script>

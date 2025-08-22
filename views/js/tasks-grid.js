@@ -34,6 +34,7 @@
 
   async function load() {
     const url = `/index.php?controller=tasksnew&action=datagrid&${qs(state)}`;
+    console.log('Cargando tareas desde:', url);
     const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
     const data = await res.json();
     renderRows(data.items || []);
@@ -44,19 +45,19 @@
     tbody.innerHTML = '';
     for (const it of items) {
       const tr = document.createElement('tr');
-      tr.className = 'border-t';
+      tr.className = 'hover:bg-gray-100 dark:hover:bg-neutral-800';
       tr.innerHTML = `
-        <td class="px-3 py-2">${it.id ?? ''}</td>
-        <td class="px-3 py-2">${escapeHtml(it.label ?? '')}</td>
-        <td class="px-3 py-2">${escapeHtml(it.status ?? '')}</td>
-        <td class="px-3 py-2">${escapeHtml(it.unit_name ?? '')}</td>
-        <td class="px-3 py-2">${escapeHtml(it.project_name ?? '')}</td>
-        <td class="px-3 py-2">${escapeHtml(it.customer_name ?? '')}</td>
-        <td class="px-3 py-2">${escapeHtml(it.type_name ?? '')}</td>
-        <td class="px-3 py-2">${escapeHtml(it.start_date ?? '')}</td>
-        <td class="px-3 py-2">${escapeHtml(it.end_date ?? '')}</td>
-        <td class="px-3 py-2">
-          <button class="px-2 py-1 border rounded"
+        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${it.id ?? ''}</td>
+        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${escapeHtml(it.label ?? '')}</td>
+        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${escapeHtml(it.status ?? '')}</td>
+        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${escapeHtml(it.unit_name ?? '')}</td>
+        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${escapeHtml(it.project_name ?? '')}</td>
+        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${escapeHtml(it.customer_name ?? '')}</td>
+        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${escapeHtml(it.type_name ?? '')}</td>
+        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${escapeHtml(it.start_date ?? '')}</td>
+        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${escapeHtml(it.end_date ?? '')}</td>
+        <td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-end">
+          <button class="py-1.5 px-2.5 inline-flex items-center gap-x-1.5 text-xs font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800"
                   data-action="edit"
                   data-id="${it.id}">
             Editar
@@ -111,45 +112,48 @@
     load();
   });
 
-  // Modal de edición
-  const dlg     = document.getElementById('taskModal');
-  const saveBtn = document.getElementById('saveBtn');
-  const mTitle  = document.getElementById('m_title');
-  const mStatus = document.getElementById('m_status');
-
-  tbody.addEventListener('click', (e) => {
-    const btn = e.target.closest('button[data-action]');
-    if (!btn) return;
-    const id = btn.getAttribute('data-id');
-    if (btn.dataset.action === 'edit') {
-      openEditModal(id);
-    }
-  });
-
-  async function openEditModal(id) {
-    // Cargar los datos actuales de la tarea
-    const res = await fetch(`/tasks/${id}`, { headers: { 'Accept': 'application/json' } });
-    const it = await res.json();
-    document.getElementById('modalTitle').textContent = `Editar Tarea #${id}`;
-    mTitle.value  = it.label ?? '';
-    mStatus.value = it.status ?? '1';
-    dlg.showModal();
-
-    saveBtn.onclick = async (ev) => {
-      ev.preventDefault();
-      const payload = {
-        label: mTitle.value,
-        status: mStatus.value,
-      };
-      await fetch(`/tasks/${id}`, {
-        method: 'POST', // o PUT si usas method override
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+  // Modal de edición (asumo que tienes un modal con este id en alguna parte)
+  const dlg = document.getElementById('taskModal');
+  if (dlg) {
+      const saveBtn = document.getElementById('saveBtn');
+      const mTitle  = document.getElementById('m_title');
+      const mStatus = document.getElementById('m_status');
+    
+      tbody.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-action]');
+        if (!btn) return;
+        const id = btn.getAttribute('data-id');
+        if (btn.dataset.action === 'edit') {
+          openEditModal(id);
+        }
       });
-      dlg.close();
-      load();
-    };
+    
+      async function openEditModal(id) {
+        // Cargar los datos actuales de la tarea
+        const res = await fetch(`/tasks/${id}`, { headers: { 'Accept': 'application/json' } });
+        const it = await res.json();
+        document.getElementById('modalTitle').textContent = `Editar Tarea #${id}`;
+        mTitle.value  = it.label ?? '';
+        mStatus.value = it.status ?? '1';
+        dlg.showModal();
+    
+        saveBtn.onclick = async (ev) => {
+          ev.preventDefault();
+          const payload = {
+            label: mTitle.value,
+            status: mStatus.value,
+          };
+          await fetch(`/tasks/${id}`, {
+            method: 'POST', // o PUT si usas method override
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+          dlg.close();
+          load();
+        };
+      }
   }
+
 
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, (c) => ({

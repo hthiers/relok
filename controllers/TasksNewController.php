@@ -34,8 +34,8 @@ class TasksNewController extends ControllerBase
       $units = $unitsResult['items'] ?? [];
 
       $data = [
-          'page_title'   => 'Tareas',
-          'content_view' => 'tasksnew/table.php', // <-- partial que creaste
+          'pageTitle'   => 'Tareas',
+          'contentPath' => 'tasksnew/table.php', // <-- partial que creaste
           'units'        => $units,
           // Si quieres cards de resumen en el layout:
           // 'summary_cards' => [
@@ -57,29 +57,9 @@ class TasksNewController extends ControllerBase
     public function datagrid(): void
     {
         // Recoger y normalizar parámetros GET
-        $criteria = [
-            'search'      => $_GET['search']      ?? '',
-            'status'      => $_GET['status']      ?? '',
-            'unit_id'     => $_GET['unit_id']     ?? '',
-            'project_id'  => $_GET['project_id']  ?? '',
-            'customer_id' => $_GET['customer_id'] ?? '',
-            'type_id'     => $_GET['type_id']     ?? '',
-            'user_id'     => $_GET['user_id']     ?? '',
-            'year'        => $_GET['year']        ?? '',
-            'month'       => $_GET['month']       ?? '',
-            'day'         => $_GET['day']         ?? '',
-            'tenant_id'   => $_GET['tenant_id']   ?? '',
-            'sort'        => $_GET['sort']        ?? 'start_date',
-            'dir'         => $_GET['dir']         ?? 'desc',
-            'page'        => $_GET['page']        ?? 1,
-            'pageSize'    => $_GET['pageSize']    ?? 20,
-        ];
-
-        // Consultar el repositorio
-        $result = $this->taskRepo->findForGrid($criteria);
-
-        // Devolver JSON
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode($result);
+        $params = $_GET;
+        $data = $this->taskRepo->findForGrid($params);
+        header('Content-Type: application/json');
+        echo json_encode($data);
     }
 }
