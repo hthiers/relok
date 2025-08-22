@@ -53,8 +53,8 @@
         <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${escapeHtml(it.unit_name ?? '')}</td>
         <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${escapeHtml(it.customer_name ?? '')}</td>
         <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${escapeHtml(it.type_name ?? '')}</td>
-        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${escapeHtml(it.start_date ?? '')}</td>
-        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${escapeHtml(it.end_date ?? '')}</td>
+        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${escapeHtml(formatDate(it.start_date) ?? '')}</td>
+        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${escapeHtml(formatDate(it.end_date) ?? '')}</td>
         <td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-end">
           <button class="py-1.5 px-2.5 inline-flex items-center gap-x-1.5 text-xs font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800"
                   data-action="edit"
@@ -158,6 +158,18 @@
     return String(s).replace(/[&<>"']/g, (c) => ({
       '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
     }[c]));
+  }
+
+  function formatDate(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return ''; // Devuelve vacío si la fecha no es válida
+    
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Los meses son base 0
+    const year = date.getFullYear();
+    
+    return `${day}/${month}/${year}`;
   }
 
   // Carga inicial
