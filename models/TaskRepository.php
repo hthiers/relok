@@ -30,19 +30,20 @@ class TaskRepository
      * Obtiene una lista de tareas para ser mostradas en un datagrid.
      *
      * Los filtros disponibles en el parámetro $criteria son:
-     *  - search: texto a buscar en label_task o desc_task
-     *  - status: estado de la tarea (int)
-     *  - unit_id: id de la unidad a la que pertenece
-     *  - project_id: id del proyecto
-     *  - customer_id: id del cliente
-     *  - type_id: id de la materia (cas_type)
-     *  - user_id: id del usuario creador
-     *  - year / month / day: fecha de inicio (date_ini)
-     *  - tenant_id: id del tenant para restringir resultados
-     *  - sort: clave de columna a ordenar (ver $sortable)
-     *  - dir: dirección de orden ('asc' o 'desc')
-     *  - page: página actual (desde 1)
-     *  - pageSize: tamaño de página
+     * - search: texto a buscar en label_task o desc_task
+     * - status: estado de la tarea (int)
+     * - unit_id: id de la unidad a la que pertenece
+     * - project_id: id del proyecto
+     * - customer_id: id del cliente
+     * - type_id: id de la materia (cas_type)
+     * - user_id: id del usuario creador
+     * - start_date: fecha de inicio del rango (YYYY-MM-DD)
+     * - end_date: fecha de fin del rango (YYYY-MM-DD)
+     * - tenant_id: id del tenant para restringir resultados
+     * - sort: clave de columna a ordenar (ver $sortable)
+     * - dir: dirección de orden ('asc' o 'desc')
+     * - page: página actual (desde 1)
+     * - pageSize: tamaño de página
      *
      * @param array $criteria
      * @return array ['items' => array, 'page' => int, 'page_size' => int, 'total' => int]
@@ -112,40 +113,39 @@ class TaskRepository
             $where[] = 't.id_user = :user_id';
             $params[':user_id'] = (int)$criteria['user_id'];
         }
-        if (!empty($criteria['year'])) {
-            $where[] = 'YEAR(t.date_ini) = :year';
-            $params[':year'] = (int)$criteria['year'];
-        }
-        if (!empty($criteria['month'])) {
-            $where[] = 'MONTH(t.date_ini) = :month';
-            $params[':month'] = (int)$criteria['month'];
-        }
-        if (!empty($criteria['day'])) {
-            $where[] = 'DAY(t.date_ini) = :day';
-            $params[':day'] = (int)$criteria['day'];
+
+        // ===== LÓGICA MODIFICADA PARA FILTRO DE RANGO DE FECHA =====
+        // Se eliminan los filtros de year, month y day
+        if (!empty($criteria['start_date']) && !empty($criteria['end_date'])) {
+            error_log("Applying date range filter: " . $criteria['start_date'] . " to " . $criteria['end_date']);
+            // Se usa BETWEEN para filtrar las tareas cuya fecha de inicio
+            // esté dentro del rango seleccionado.
+            $where[] = 'DATE(t.date_ini) BETWEEN :start_date AND :end_date';
+            $params[':start_date'] = $criteria['start_date'];
+            $params[':end_date'] = $criteria['end_date'];
         }
 
         // Ignorar las eliminadas
-        $where[] = 't.status_task <> 9';
+        //$where[] = 't.status_task <> 9';
+        //error_log("Current WHERE conditions: " . implode(' AND ', $where));
 
         $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
         // Consulta principal con joins a project, customer, type, user y unit
         $sql = "
             SELECT SQL_CALC_FOUND_ROWS
-                   t.id_task     AS id,
-                   t.code_task   AS code,
-                   t.label_task  AS label,
-                   t.date_ini    AS start_date,
-                   t.date_end    AS end_date,
-                   t.time_total  AS time_total,
-                   t.status_task AS status,
-                   ts.name_status AS name_status,
-                   p.label_project  AS project_name,
-                   c.label_customer AS customer_name,
-                   ty.label_type    AS type_name,
-                   u.name_user      AS user_name,
-                   un.name          AS unit_name
+                t.id_task     AS id,
+                t.code_task   AS code,
+                t.label_task  AS label,
+                t.date_ini    AS start_date,
+                t.date_end    AS end_date,
+                t.time_total  AS time_total,
+                ts.name_status AS status_name,
+                p.label_project  AS project_name,
+                c.label_customer AS customer_name,
+                ty.label_type    AS type_name,
+                u.name_user      AS user_name,
+                un.name          AS unit_name
             FROM {$this->table} t
             LEFT JOIN cas_project p ON t.cas_project_id_project = p.id_project
             LEFT JOIN cas_customer c ON t.cas_customer_id_customer = c.id_customer
@@ -158,16 +158,36 @@ class TaskRepository
             LIMIT :limit OFFSET :offset
         ";
 
+        //error_log("SQL Query: " . $sql); // Log the SQL query for debugging
+        //error_log("Parameters: " . json_encode($params)); // Log the parameters for debugging
+
         $stmt = $this->pdo->prepare($sql);
         foreach ($params as $key => $val) {
             $type = is_int($val) ? \PDO::PARAM_INT : \PDO::PARAM_STR;
             $stmt->bindValue($key, $val, $type);
         }
+
+        $debugSql = $sql;
+        $debugParams = $params;
+
         $limit  = $pageSize;
         $offset = ($page - 1) * $pageSize;
+        $debugParams[':limit'] = $limit;
+        $debugParams[':offset'] = $offset;
+
+        foreach ($debugParams as $key => $val) {
+            // Usamos $this->pdo->quote() para escapar el valor de forma segura,
+            // esto añade las comillas necesarias a los strings.
+            $debugSql = str_replace($key, $this->pdo->quote($val), $debugSql);
+        }
+
+        error_log("DEBUG SQL TaskRepository: " . $debugSql);
+
         $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
         $stmt->execute();
+
+        error_log("Executed SQL Query: " . $sql); // Log the executed SQL query for debugging
 
         $items = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         $total = (int)$this->pdo->query("SELECT FOUND_ROWS()")->fetchColumn();

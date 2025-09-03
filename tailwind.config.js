@@ -5,10 +5,15 @@ export default {
     './Controllers/**/*.php',
     './controllers/**/*.php',
     './index.php',
-    './public/**/*.js'
+    './public/**/*.js',
+    './node_modules/preline/dist/*.js',
+    './node_modules/@preline/datepicker/**/*.js',
   ],
   theme: {
     extend: {}
   },
-  plugins: []
+  plugins: [
+    require('preline/plugin'),
+    require('@preline/datepicker/plugin'),
+  ]
 }

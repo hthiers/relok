@@ -49,6 +49,23 @@ class TasksNewController extends ControllerBase
       $this->view->show('layouts/cms.php', $data);
     }
 
+    public function test(): void
+    {
+        // Renderiza la vista usando el layout de testing.
+        $unitsResult = $this->unitRepo->findAll(1, 1000);
+        $units = $unitsResult['items'] ?? [];
+
+        $data = [
+            'pageTitle'   => 'Tareas - Testing',
+            'contentPath' => 'tasksnew/table.php', // partial reutilizable
+            'units'       => $units,
+            // Puedes añadir flags o datos específicos para el layout de testing:
+            // 'is_testing' => true,
+        ];
+
+        $this->view->show('layouts/testing.php', $data);
+    }
+
     /**
      * Endpoint JSON que devuelve las tareas filtradas y paginadas.
      * Se espera que el frontend haga peticiones GET a esta URL con los
@@ -59,6 +76,8 @@ class TasksNewController extends ControllerBase
         // Recoger y normalizar parámetros GET
         $params = $_GET;
         $data = $this->taskRepo->findForGrid($params);
+        error_log("Parameters received in datagrid: " . json_encode($params));
+        
         header('Content-Type: application/json');
         echo json_encode($data);
     }

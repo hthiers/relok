@@ -2,11 +2,14 @@
 
 /* Preline */
 @import "preline/variants.css";
-@source "../../node_modules/preline/dist/*.js";
 
 /* Plugins */
 @plugin "@tailwindcss/forms";
 
-/* (Opcional) estilos del datepicker de Preline
+/* (Opcional) estilos del datepicker de Preline */
 @import "preline/src/plugins/datepicker/styles.css";
-*/
+
+/* Fix: Asegura que el datepicker sea visible sobre los layouts de Preline */
+.vc {
+  z-index: 9999 !important;
+}

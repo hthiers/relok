@@ -18,5 +18,10 @@
     "postcss": "^8.5.6",
     "preline": "^3.2.3",
     "tailwindcss": "^4.1.12"
+  },
+  "dependencies": {
+    "@preline/datepicker": "^3.2.3",
+    "lodash": "^4.17.21",
+    "vanilla-calendar-pro": "^3.0.5"
   }
 }

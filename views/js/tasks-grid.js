@@ -1,3 +1,5 @@
+//const { default: HSDatepicker } = require("@preline/datepicker");
+
 document.addEventListener('DOMContentLoaded', () => {
   // Todo tu código original va aquí adentro
   const tbody    = document.querySelector('#grid tbody');
@@ -6,9 +8,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const pageInfo = document.querySelector('#pageinfo');
   const prevBtn  = document.querySelector('#prev');
   const nextBtn  = document.querySelector('#next');
+  const resetBtn = document.querySelector('#resetBtn');
+
 
   // Estado de la tabla
-  const state = {
+  const stateInitial = {
     search: '',
     status: '',
     unit_id: '',
@@ -23,7 +27,11 @@ document.addEventListener('DOMContentLoaded', () => {
     dir: 'desc',
     page: 1,
     page_size: 20,
+    start_date: '',
+    end_date: '',
   };
+
+  let state = { ...stateInitial };
 
   // Construye una query string a partir del estado
   const qs = (params) => {
@@ -63,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tr.innerHTML = `
         <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${it.id ?? ''}</td>
         <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${escapeHtml(it.label ?? '')}</td>
-        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${escapeHtml(it.status_name ?? '')}</td>
+        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${escapeHtml(it.name_status ?? '')}</td>
         <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${escapeHtml(it.unit_name ?? '')}</td>
         <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${escapeHtml(it.customer_name ?? '')}</td>
         <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${escapeHtml(it.type_name ?? '')}</td>
@@ -109,6 +117,47 @@ document.addEventListener('DOMContentLoaded', () => {
     state.status   = fd.get('status') || '';
     state.unit_id  = fd.get('unit_id') || '';
     state.page     = 1;
+
+    // Limpiamos los parámetros de fecha anteriores
+    state.year = '';
+    state.month = '';
+    state.day = '';
+    state.start_date = '';
+    state.end_date = '';
+
+    // --- Lógica para obtener la fecha del datepicker de Preline ---
+    const datepickerEl = document.querySelector('.hs-datepicker');
+    const selectedDate = datepickerEl ? datepickerEl.value : '';
+
+    if (selectedDate && selectedDate.includes('/ ')) {
+      const dates = selectedDate.split('/ ');
+
+      if (dates.length === 2) {
+        // Asignamos las fechas a los nuevos parámetros del estado
+        state.start_date = dates[0].replace(/\./g, '-'); // Reemplaza puntos por guiones
+        state.end_date = dates[1].replace(/\./g, '-');   // Reemplaza puntos por guiones
+      }
+
+    } else {
+      state.day = '';
+      state.month = '';
+      state.year = '';
+    }
+
+    console.log('Filtros aplicados:', state);
+
+    load();
+  });
+
+  resetBtn.addEventListener('click', () => {
+    form.reset();
+    
+    const datepickerEl = document.querySelector('.hs-datepicker');
+    if (datepickerEl) {
+      datepickerEl.value = '';
+    }
+
+    state = { ...stateInitial };
     load();
   });
 
