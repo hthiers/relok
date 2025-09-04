@@ -2,6 +2,8 @@ export default {
   content: [
     './Views/**/*.php',
     './views/**/*.php',
+    './Views/layouts/**/*.php',
+    './views/layouts/**/*.php',
     './Controllers/**/*.php',
     './controllers/**/*.php',
     './index.php',

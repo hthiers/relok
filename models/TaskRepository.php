@@ -262,4 +262,38 @@ class TaskRepository extends ModelBase
             return false;
         }
     }
+
+    /**
+     * Encuentra la última tarea activa para un usuario y tenant específicos.
+     * Una tarea activa se considera que tiene status_task = 1.
+     *
+     * @param int $userId
+     * @param int $tenantId
+     * @return array|null La tarea activa o null si no se encuentra.
+     */
+    public function findLatestActiveTask(int $userId, int $tenantId): ?array
+    {
+        $sql = "
+            SELECT 
+                label_task,
+                date_ini
+            FROM {$this->table}
+            WHERE 
+                status_task = 1 
+                AND id_user = :user_id 
+                AND id_tenant = :tenant_id
+            ORDER BY 
+                date_ini DESC
+            LIMIT 1
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            ':user_id' => $userId,
+            ':tenant_id' => $tenantId
+        ]);
+
+        $task = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $task ?: null;
+    }
 }

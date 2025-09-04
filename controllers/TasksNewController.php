@@ -7,6 +7,7 @@ use App\Models\TaskRepository;
 use App\Models\UnitRepository;
 use App\Models\CustomerRepository;
 use App\Models\TypeRepository;
+use App\Libs\FR_Session;
 
 class TasksNewController extends ControllerBase
 {
@@ -36,30 +37,38 @@ class TasksNewController extends ControllerBase
      */
     public function index(): void
     {
-      $unitsResult = $this->unitRepo->findAll(1, 1000);
-      $units = $unitsResult['items'] ?? [];
+        $session = FR_Session::singleton();
+        
+        // Obtener la tarea activa actual (usando datos de sesión)
+        $userId = $session->id_user ?? 1;
+        $tenantId = $session->id_tenant ?? 1;
+        $activeTask = $this->taskRepo->findLatestActiveTask($userId, $tenantId);
 
-      $activeCustomers = $this->customerRepo->findActiveCustomers(); // Del paso anterior
-      $activeUnits = $this->unitRepo->findActiveForSelect(); // Usamos el nuevo método
-      $activeTypes = $this->typeRepo->findActiveForSelect(); // Usamos el nuevo método
+        $unitsResult = $this->unitRepo->findAll(1, 1000);
+        $units = $unitsResult['items'] ?? [];
 
-      $data = [
-          'pageTitle'   => 'Tareas',
-          'contentPath' => 'tasksnew/table.php',
-          //'units'        => $units,
-          'customers'   => $activeCustomers, // Datos para el modal
-          'units'       => $activeUnits,
-          'types'       => $activeTypes, 
-          // Si quieres cards de resumen en el layout:
-          // 'summary_cards' => [
-          //   ['label' => 'Abiertas',     'value' => 24],
-          //   ['label' => 'En progreso',  'value' => 13],
-          //   ['label' => 'Cerradas',     'value' => 8],
-          //   ['label' => 'Tiempo (h)',   'value' => 120],
-          // ],
-      ];
+        $activeCustomers = $this->customerRepo->findActiveCustomers(); // Del paso anterior
+        $activeUnits = $this->unitRepo->findActiveForSelect(); // Usamos el nuevo método
+        $activeTypes = $this->typeRepo->findActiveForSelect(); // Usamos el nuevo método
 
-      $this->view->show('layouts/cms.php', $data);
+        $data = [
+            'pageTitle'   => 'Tareas',
+            'contentPath' => 'tasksnew/table.php',
+            //'units'        => $units,
+            'customers'   => $activeCustomers, // Datos para el modal
+            'units'       => $activeUnits,
+            'types'       => $activeTypes, 
+            'activeTask'  => $activeTask, // Tarea activa actual
+            // Si quieres cards de resumen en el layout:
+            // 'summary_cards' => [
+            //   ['label' => 'Abiertas',     'value' => 24],
+            //   ['label' => 'En progreso',  'value' => 13],
+            //   ['label' => 'Cerradas',     'value' => 8],
+            //   ['label' => 'Tiempo (h)',   'value' => 120],
+            // ],
+        ];
+
+        $this->view->show('layouts/cms.php', $data);
     }
 
     public function test(): void

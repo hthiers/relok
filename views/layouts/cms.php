@@ -22,8 +22,7 @@ $contentPath = $contentPath ?? null;
                 R
             </a>
             <span class="font-semibold text-gray-800 dark:text-neutral-200">Relok</span>
-
-            <button type="button" class="p-1.5 size-7.5 inline-flex items-center gap-x-1 text-xs rounded-md border border-transparent text-gray-500 hover:text-gray-800 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:text-gray-800 dark:text-neutral-500 dark:hover:text-neutral-400 dark:focus:text-neutral-400" data-hs-overlay="#hs-pro-sidebar">
+            <button type="button" class="p-1.5 size-7.5 inline-flex items-center gap-x-1 text-xs rounded-md border border-transparent text-gray-500 hover:text-gray-800..." data-hs-overlay="#hs-pro-sidebar">
               <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect width="18" height="18" x="3" y="3" rx="2" />
                 <path d="M15 3v18" />
@@ -32,29 +31,34 @@ $contentPath = $contentPath ?? null;
               <span class="sr-only">Sidebar Toggle</span>
             </button>
 
-            <!-- User Profile Dropdown -->
             <div class="ms-auto flex items-center gap-x-3">
-                 <div class="hs-dropdown relative inline-flex [--strategy:absolute] [--auto-close:inside] [--placement:bottom-right]">
+            
+                <!-- Indicador de tarea activa -->
+                <?php if (isset($activeTask) && $activeTask): ?>
+                    <div id="active-task-tracker" 
+                         class="flex items-center gap-x-2 bg-green-100 text-green-800 text-sm font-medium ps-3 pe-2 rounded-full dark:bg-green-800 dark:text-green-100"
+                         data-start-time="<?= htmlspecialchars($activeTask['date_ini']) ?>">
+                        
+                        <span class="truncate max-w-48" title="<?= htmlspecialchars($activeTask['label_task']) ?>">
+                            <?= htmlspecialchars($activeTask['label_task']) ?>
+                        </span>
+                        <span id="task-timer" class="font-mono bg-black/5 dark:bg-green-700 rounded-full px-2 py-0.5">00:00:00</span>
+                    </div>
+                <?php endif; ?>
+                <!-- Fin Indicador de tarea activa -->
+
+                 <!-- Perfil de usuario -->
+                <div class="hs-dropdown relative inline-flex [--strategy:absolute] [--auto-close:inside] [--placement:bottom-right]">
                      <button id="hs-account-dd" type="button" aria-haspopup="menu" aria-expanded="false" class="p-0.5 inline-flex items-center rounded-full hover:bg-gray-200 dark:hover:bg-neutral-800">
                          <img class="w-8 h-8 rounded-full" src="https://i.pravatar.cc/80?img=5" alt="Avatar">
                      </button>
                      <div class="hs-dropdown-menu hidden opacity-0 transition-[opacity,margin] duration z-50 w-60 bg-white border border-gray-200 rounded-xl shadow-xl dark:bg-neutral-900 dark:border-neutral-700" role="menu" aria-labelledby="hs-account-dd">
-                         <div class="py-2 px-3.5">
-                             <span class="font-medium text-gray-800 dark:text-neutral-300">Perfil</span>
-                             <p class="text-xs text-gray-500 dark:text-neutral-500">usuario@relok</p>
                          </div>
-                         <div class="border-t border-gray-200 dark:border-neutral-800 p-1">
-                             <a class="flex items-center gap-3 py-2 px-3 rounded-lg text-sm text-gray-600 hover:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-800" href="/?controller=auth&action=logout">
-                                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>
-                                 Salir
-                             </a>
-                         </div>
-                     </div>
                  </div>
             </div>
         </div>
     </nav>
-  </header>
+</header>
 
   <main class="lg:hs-overlay-layout-open:ps-60 transition-all duration-300 lg:fixed lg:inset-0 pt-13 px-3 pb-3">
 
@@ -211,6 +215,39 @@ $contentPath = $contentPath ?? null;
         setTimeout(() => {
           window.HSStaticMethods.autoInit();
         }, 100);
+      });
+    </script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+          const tracker = document.getElementById('active-task-tracker');
+          if (!tracker) return;
+
+          const timerDisplay = document.getElementById('task-timer');
+          const startTimeString = tracker.dataset.startTime;
+          
+          // Convertir la fecha de la base de datos (que asumimos en UTC/GMT) a un objeto Date
+          const startTime = new Date(startTimeString.replace(' ', 'T') + 'Z');
+
+          const updateTimer = () => {
+              const now = new Date();
+              const elapsedMilliseconds = now - startTime;
+
+              if (elapsedMilliseconds < 0) return;
+
+              let totalSeconds = Math.floor(elapsedMilliseconds / 1000);
+              let hours = Math.floor(totalSeconds / 3600);
+              totalSeconds %= 3600;
+              let minutes = Math.floor(totalSeconds / 60);
+              let seconds = totalSeconds % 60;
+
+              // Formatear a HH:MM:SS
+              timerDisplay.textContent = 
+                  `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+          };
+          
+          // Actualizar el cronómetro cada segundo
+          setInterval(updateTimer, 1000);
+          updateTimer(); // Llamada inicial para que no espere 1 segundo en aparecer
       });
     </script>
 </body>
