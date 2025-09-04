@@ -106,32 +106,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Renderiza las tareas como tarjetas
   function renderCards(items) {
-    cardsContainer.innerHTML = ''; // Limpiar el contenedor antes de añadir nuevas tarjetas
-    if (items.length === 0) {
-        cardsContainer.innerHTML = `<p class="text-gray-500 col-span-full text-center">No se encontraron tareas.</p>`;
-        return;
-    }
+      cardsContainer.innerHTML = '';
+      if (items.length === 0) { /* ... */ return; }
 
-    for (const it of items) {
-      const card = document.createElement('div');
-      card.className = 'bg-white border rounded-lg shadow-sm p-4 dark:bg-neutral-800 dark:border-neutral-700 flex flex-col justify-between';
-      card.innerHTML = `
-          <div>
-              <div class="flex justify-between items-start mb-2">
-                  <span class="text-xs font-semibold uppercase text-gray-500 dark:text-neutral-400">ID: ${it.id ?? ''}</span>
-                  <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">${escapeHtml(it.status_name ?? '')}</span>
+      for (const it of items) {
+          const card = document.createElement('div');
+          card.className = 'task-card bg-white border rounded-lg shadow-sm p-4 dark:bg-neutral-800 dark:border-neutral-700 flex flex-col justify-between cursor-pointer hover:shadow-lg transition-shadow';
+          
+          // ===== CAMBIO IMPORTANTE: Solo guardamos el ID =====
+          card.dataset.taskId = it.id;
+
+          card.innerHTML = `
+              <div>
+                  <div class="flex justify-between items-start mb-2">
+                      <span class="text-xs font-semibold uppercase text-gray-500 dark:text-neutral-400">ID: ${it.id ?? ''}</span>
+                      <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">${escapeHtml(it.status_name ?? '')}</span>
+                  </div>
+                  <h3 class="text-md font-bold text-gray-800 dark:text-white mb-2">${escapeHtml(it.label ?? '')}</h3>
+                  <p class="text-sm text-gray-600 dark:text-neutral-300"><span class="font-semibold">Cliente:</span> ${escapeHtml(it.customer_name ?? 'N/A')}</p>
               </div>
-              <h3 class="text-md font-bold text-gray-800 dark:text-white mb-2">${escapeHtml(it.label ?? '')}</h3>
-              <p class="text-sm text-gray-600 dark:text-neutral-300 mb-1"><span class="font-semibold">Cliente:</span> ${escapeHtml(it.customer_name ?? 'N/A')}</p>
-              <p class="text-sm text-gray-600 dark:text-neutral-300"><span class="font-semibold">Unidad:</span> ${escapeHtml(it.unit_name ?? 'N/A')}</p>
-          </div>
-          <div class="border-t border-gray-200 dark:border-neutral-700 mt-4 pt-3 text-xs text-gray-500 dark:text-neutral-400">
-              <p><strong>Inicio:</strong> ${formatDate(it.start_date)}</p>
-              <p><strong>Fin:</strong> ${formatDate(it.end_date)}</p>
-          </div>
-      `;
-      cardsContainer.appendChild(card);
-    }
+              <div class="border-t border-gray-200 dark:border-neutral-700 mt-4 pt-3 text-xs text-gray-500 dark:text-neutral-400">
+                  <p><strong>Inicio:</strong> ${formatDate(it.start_date)}</p>
+              </div>
+          `;
+          cardsContainer.appendChild(card);
+      }
   }
 
   // Renderiza el paginador
@@ -141,6 +140,56 @@ document.addEventListener('DOMContentLoaded', () => {
     prevBtn.disabled = page <= 1;
     nextBtn.disabled = page >= pages;
   }
+
+  // Lógica para abrir el modal en modo EDICIÓN
+  async function openEditModal(taskId) {
+    const modal = document.querySelector('#task-form-modal');
+    if (!modal) return;
+
+    // 1. Resetear y preparar el modal
+    modal.querySelector('#task-modal-title').textContent = `Cargando Tarea #${taskId}...`;
+    modal.querySelector('#task-form').reset(); // Limpiar formulario
+    modal.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true); // Deshabilitar mientras carga
+
+    // Mostrar/ocultar botones
+    modal.querySelector('#save-task-btn').classList.add('hidden');
+    modal.querySelector('#finish-task-btn').classList.add('hidden');
+
+    HSOverlay.open(modal); // Abrir el modal para mostrar la carga
+
+    try {
+        // 2. Hacer la petición al backend para obtener los datos completos
+        const response = await fetch(`/?controller=tasksnew&action=getTaskDetails&id=${taskId}`);
+        const result = await response.json();
+
+        if (!result.success) {
+            throw new Error(result.message);
+        }
+
+        const task = result.data;
+
+        // 3. Poblar el formulario con los datos completos recibidos
+        modal.querySelector('#task-modal-title').textContent = `Detalle Tarea #${task.id}`;
+        modal.querySelector('#task-id').value = task.id;
+        modal.querySelector('#task-name').value = task.label || '';
+        modal.querySelector('#task-description').value = task.desc_task || '';
+        
+        // Pre-seleccionar los valores correctos en los selectores
+        modal.querySelector('#task-customer').value = task.customer_id || '';
+        modal.querySelector('#task-unit').value = task.unit_id || '';
+        modal.querySelector('#task-type').value = task.type_id || '';
+
+        // 4. Configurar botones y campos para el modo edición
+        modal.querySelector('#finish-task-btn').classList.remove('hidden');
+        // Opcional: Habilitar solo algunos campos si se permite editar
+        // modal.querySelector('#task-name').disabled = false;
+
+    } catch (error) {
+        console.error('Error al cargar la tarea:', error);
+        modal.querySelector('#task-modal-title').textContent = 'Error al cargar';
+        // Opcional: mostrar un mensaje de error dentro del modal
+    }
+}
 
   // --- MANEJADORES DE EVENTOS ---
 
@@ -181,6 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Aplicar filtros
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     const fd = new FormData(form);
@@ -220,6 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
     load();
   });
 
+  // Borrar filtros
   resetBtn.addEventListener('click', () => {
     form.reset();
     
@@ -240,6 +291,58 @@ document.addEventListener('DOMContentLoaded', () => {
     state.page += 1;
     load();
   });
+
+  // Evento para abrir el modal al hacer clic en una tarjeta
+  cardsContainer.addEventListener('click', (e) => {
+    const card = e.target.closest('.task-card');
+    if (card && card.dataset.taskId) {
+        const taskId = card.dataset.taskId;
+        openEditModal(taskId);
+    }
+  });
+
+  // --- MANEJADOR DE EVENTOS PARA EL MODAL ---
+  const modal = document.querySelector('#task-form-modal');
+  if (modal) {
+      const finishButton = modal.querySelector('#finish-task-btn');
+
+      finishButton.addEventListener('click', async () => {
+          const taskId = modal.querySelector('#task-id').value;
+          if (!taskId) {
+              alert('No se ha podido identificar la tarea.');
+              return;
+          }
+
+          // Confirmación antes de terminar la tarea
+          if (!confirm(`¿Estás seguro de que quieres terminar la tarea #${taskId}?`)) {
+              return;
+          }
+
+          try {
+              const formData = new FormData();
+              formData.append('task_id', taskId);
+
+              // Petición al nuevo endpoint del controlador
+              const response = await fetch('/?controller=tasksnew&action=finish', {
+                  method: 'POST',
+                  body: formData
+              });
+
+              const result = await response.json();
+
+              if (result.success) {
+                  alert('Tarea terminada exitosamente.');
+                  HSOverlay.close(modal); // Cerrar el modal
+                  load(); // Recargar la lista de tareas
+              } else {
+                  alert('Error al terminar la tarea: ' + (result.message || 'Error desconocido.'));
+              }
+          } catch (error) {
+              console.error('Error en la petición:', error);
+              alert('Ocurrió un error de conexión.');
+          }
+      });
+  }
 
   const dlg = document.getElementById('taskModal');
 

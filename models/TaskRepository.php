@@ -296,4 +296,73 @@ class TaskRepository extends ModelBase
         $task = $stmt->fetch(PDO::FETCH_ASSOC);
         return $task ?: null;
     }
+
+    /**
+     * Encuentra una tarea por su ID y devuelve todos sus detalles.
+     *
+     * @param int $taskId
+     * @return array|null La tarea o null si no se encuentra.
+     */
+    public function findById(int $taskId): ?array
+    {
+        // Esta consulta es similar a la de findForGrid pero para un solo ID
+        $sql = "
+            SELECT 
+                   t.id_task     AS id,
+                   t.label_task  AS label,
+                   t.desc_task   AS desc_task,
+                   t.status_task AS status,
+                   t.cas_customer_id_customer AS customer_id,
+                   t.cas_unit_id AS unit_id,
+                   t.id_type AS type_id
+            FROM {$this->table} t
+            WHERE t.id_task = :task_id
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':task_id' => $taskId]);
+        $task = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        return $task ?: null;
+    }
+
+    /**
+     * Finaliza una tarea, actualizando su estado y fecha de finalización.
+     *
+     * @param int $taskId El ID de la tarea a finalizar.
+     * @return bool True si la actualización fue exitosa, false en caso contrario.
+     */
+    public function finishTask(int $taskId): bool
+    {
+        // Asumimos que el estado "Finalizada" es el ID 2
+        $finishedStatus = 2; 
+        $endDate = date('Y-m-d H:i:s');
+
+        $sql = "
+            UPDATE {$this->table}
+            SET 
+                status_task = :status,
+                date_end = :end_date
+            WHERE 
+                id_task = :task_id
+        ";
+
+        try {
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([
+                ':status'   => $finishedStatus,
+                ':end_date' => $endDate,
+                ':task_id'  => $taskId
+            ]);
+
+            // rowCount() devuelve el número de filas afectadas. 
+            // Si es mayor que 0, la actualización funcionó.
+            return $stmt->rowCount() > 0;
+
+        } catch (PDOException $e) {
+            error_log("Error al finalizar tarea: " . $e->getMessage());
+            return false;
+        }
+    }
+
 }

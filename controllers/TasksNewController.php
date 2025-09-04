@@ -166,4 +166,63 @@ class TasksNewController extends ControllerBase
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
     }
+
+    /**
+     * Obtiene los detalles de una única tarea y los devuelve como JSON.
+     */
+    public function getTaskDetails()
+    {
+        header('Content-Type: application/json');
+        
+        try {
+            $taskId = (int)($_GET['id'] ?? 0);
+            if (empty($taskId)) {
+                throw new Exception("ID de tarea no proporcionado.");
+            }
+
+            $task = $this->taskRepo->findById($taskId);
+
+            if ($task) {
+                echo json_encode(['success' => true, 'data' => $task]);
+            } else {
+                throw new Exception("Tarea no encontrada.");
+            }
+        } catch (Exception $e) {
+            http_response_code(404); // Not Found
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Recibe la petición para finalizar una tarea.
+     */
+    public function finish()
+    {
+        header('Content-Type: application/json');
+
+        try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                throw new Exception("Método no permitido.");
+            }
+
+            $taskId = (int)($_POST['task_id'] ?? 0);
+            if (empty($taskId)) {
+                throw new Exception("ID de tarea no proporcionado.");
+            }
+
+            $success = $this->taskRepo->finishTask($taskId);
+
+            if ($success) {
+                echo json_encode(['success' => true]);
+            } else {
+                // Esto puede ocurrir si el ID no existe o si no hubo cambios.
+                throw new Exception("No se pudo actualizar la tarea en la base de datos.");
+            }
+
+        } catch (Exception $e) {
+            http_response_code(400); // Bad Request
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
 }
