@@ -13,3 +13,9 @@
 .vc {
   z-index: 9999 !important;
 }
+
+/* Fix: Asegura que los overlays de Preline (modales, datepickers, etc.) 
+   sean visibles sobre los layouts complejos. */
+.hs-overlay {
+  z-index: 9999 !important;
+}

@@ -1,7 +1,9 @@
 <?php
 namespace App\Models;
+use App\Libs\ModelBase;
+use PDO;
 
-class UnitRepository
+class UnitRepository extends ModelBase
 {
     private \PDO $pdo;
     private string $table = 'cas_unit';
@@ -47,6 +49,18 @@ class UnitRepository
 
         $total = (int)$this->pdo->query("SELECT FOUND_ROWS()")->fetchColumn();
         return ['items' => $items, 'total' => $total, 'page' => $page, 'perPage' => $perPage];
+    }
+
+    /**
+     * Obtiene una lista de todas las unidades activas, ideal para selectores.
+     * * @return array
+     */
+    public function findActiveForSelect(): array
+    {
+        $sql = "SELECT id, name FROM {$this->table} WHERE is_active = 1 ORDER BY name ASC";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     /** Crear y devolver id insertado */

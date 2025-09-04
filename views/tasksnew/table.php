@@ -1,7 +1,7 @@
 <div class="flex flex-col">
 
   <!-- Filtros y Búsqueda -->
-  <div class="bg-gray-50 rounded-lg p-4 mb-4 dark:bg-neutral-800">
+  <div class="bg-gray-50 rounded-lg p-4 mb-2 dark:bg-neutral-800">
     <button type="button"
             class="hs-collapse-toggle w-full flex justify-between items-center text-sm font-semibold text-gray-700 dark:text-neutral-300"
             id="hs-filters-collapse-trigger"
@@ -90,7 +90,7 @@
   </div>
   <!-- End Filtros y Búsqueda -->
 
-  <div class="flex justify-end items-center my-4">
+  <div class="flex items-center mb-4">
     <div class="inline-flex bg-gray-100 rounded-lg p-1 dark:bg-neutral-800">
         <button id="view-cards-btn" type="button" class="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md">
             Tarjetas

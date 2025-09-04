@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Models;
+use App\Libs\ModelBase;
+use PDO;
 
 /**
  * Repository: TaskRepository
@@ -13,7 +15,7 @@ namespace App\Models;
  * paginación en interfaces gráficas.
  */
 
-class TaskRepository
+class TaskRepository extends ModelBase
 {
     /** @var \PDO */
     private \PDO $pdo;
@@ -198,5 +200,66 @@ class TaskRepository
             'page_size' => $pageSize,
             'total'     => $total,
         ];
+    }
+
+    /**
+     * Inserta una nueva tarea en la base de datos.
+     *
+     * @param array $data Datos de la tarea a crear.
+     * @return int|false El ID de la nueva tarea o false en caso de error.
+     */
+    public function createTask(array $data)
+    {
+        $sql = "
+            INSERT INTO {$this->table} (
+                label_task, 
+                desc_task, 
+                cas_customer_id_customer, 
+                cas_unit_id, 
+                status_task, 
+                id_user, 
+                id_tenant, 
+                date_ini,
+                code_task,
+                id_type
+            ) VALUES (
+                :label_task, 
+                :desc_task, 
+                :cas_customer_id_customer, 
+                :cas_unit_id, 
+                :status_task, 
+                :id_user, 
+                :id_tenant, 
+                :date_ini,
+                :code_task,
+                :id_type
+            )
+        ";
+
+        try {
+            $stmt = $this->pdo->prepare($sql);
+
+            $stmt->bindValue(':label_task', $data['label_task'], PDO::PARAM_STR);
+            $stmt->bindValue(':desc_task', $data['desc_task'], PDO::PARAM_STR);
+            $stmt->bindValue(':cas_customer_id_customer', $data['cas_customer_id_customer'], PDO::PARAM_INT);
+            $stmt->bindValue(':cas_unit_id', $data['cas_unit_id'], PDO::PARAM_INT);
+            $stmt->bindValue(':status_task', $data['status_task'], PDO::PARAM_INT);
+            $stmt->bindValue(':id_user', $data['id_user'], PDO::PARAM_INT);
+            $stmt->bindValue(':id_tenant', $data['id_tenant'], PDO::PARAM_INT);
+            $stmt->bindValue(':date_ini', $data['date_ini'], PDO::PARAM_STR);
+            $stmt->bindValue(':code_task', $data['code_task'], PDO::PARAM_STR);
+            $stmt->bindValue(':id_type', $data['id_type'], PDO::PARAM_INT);
+
+            if ($stmt->execute()) {
+                return $this->pdo->lastInsertId();
+            } else {
+                return false;
+            }
+
+        } catch (PDOException $e) {
+            // Aquí podrías loguear el error real
+            error_log("Error al crear tarea: " . $e->getMessage());
+            return false;
+        }
     }
 }
